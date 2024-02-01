@@ -22,28 +22,36 @@ class Food:
 
 class Snake:
     def __init__(self, x, y):
-        self.x = x
-        self.y = y
+        self.body = [{'x': x, 'y': y}]
         self.width = 10
         self.height = 10
-        self.direction_x = self.direction_y = 0
         self.color = (255, 0, 0)
         self.length = 0
 
     def show(self, screen):
-        g.draw.rect(screen, self.color, (self.x, self.y, self.width, self.height), border_radius=1)
+        for section in self.body:
+            g.draw.rect(screen, self.color, (section['x'], section['y'], self.width, self.height), border_radius=1)
 
-    def move(self, direction_1, direction_2):
-        self.direction_x = direction_1
-        self.direction_y = direction_2
-        self.x += self.direction_x
-        self.y += self.direction_y
+    def move(self, direction_x, direction_y, growing=False):
+        head = {'x': self.body[0]['x'] + direction_x, 'y': self.body[0]['y'] + direction_y}
+        self.body.insert(0, head)
 
-    def get_x(self):
-        return self.x
+        if not growing:
+            self.body.pop()
 
-    def get_y(self):
-        return self.y
+    def check_collision_with_body(self):
+        head = self.body[0]
+        for section in self.body[1:]:
+            if head == section:
+                return True
+        return False
+
+    def grow(self):
+        tail = self.body[-1]
+        self.body.append({'x': tail['x'], 'y': tail['y']})
+
+    def get_head(self):
+        return self.body[0]
 
 
 def init_snake(screen):
@@ -52,8 +60,8 @@ def init_snake(screen):
     return Snake(x, y)
 
 
-def move_snake(snake, x, y):
-    snake.move(x, y)
+def move_snake(snake, x, y, growing):
+    snake.move(x, y, growing)
 
 
 def show_snake(screen, snake):
@@ -69,33 +77,35 @@ def show_food(screen, food):
 
 
 def check_game_over(screen, snake):
-    x = snake.get_x()
-    y = snake.get_y()
-    if x <= 0 or y <= 0 or x >= screen.get_width() or y >= screen.get_height():
+    head = snake.get_head()
+    x = head['x']
+    y = head['y']
+    if x <= 0 or y <= 0 or x >= screen.get_width() or y >= screen.get_height() or snake.check_collision_with_body():
         return True
-    else:
-        return False
+    return False
 
 
 def check_collision(snake, food):
-    if snake.get_x() < food.x + 10 and snake.get_x() + snake.width > food.x \
-            and snake.get_y() < food.y + 10 and snake.get_y() + snake.height > food.y:
-        snake.length += 1
+    head = snake.get_head()
+    snake_x = head['x']
+    snake_y = head['y']
+    food_x = food.get_x()
+    food_y = food.get_y()
+    if snake_x < food_x + 10 and snake_x + 10 > food_x \
+            and snake_y < food_y + 10 and snake_y + 10 > food_y:
+        # snake.length += 1
+        # snake.grow()
         return True
-    else:
-        return False
+    return False
 
 
 def main():
     size = (800, 600)
     g.init()
     screen = g.display.set_mode(size, g.RESIZABLE)
-    # g.display.update()
     g.display.set_caption("Snake")
 
-    BLACK = (0, 0, 0)
-    WHITE = (255, 255, 255)
-    FPS = 30
+    fps = 30
 
     game_over = False
     clock = g.time.Clock()
@@ -105,8 +115,9 @@ def main():
     g.time.delay(1000)
 
     while not game_over:
-        clock.tick(FPS)
+        clock.tick(fps)
 
+        growing = False
         for event in g.event.get():
             if event.type == g.QUIT:
                 game_over = True
@@ -125,15 +136,19 @@ def main():
                     direction_x = 5
                     direction_y = 0
 
-        screen.fill(BLACK)
+        screen.fill((0, 0, 0))
         show_food(screen, food)
         show_snake(screen, snake)
-        move_snake(snake, direction_x, direction_y)
+        move_snake(snake, direction_x, direction_y, growing)
+
         if check_game_over(screen, snake):
             game_over = True
 
         if check_collision(snake, food):
             food = init_food()
+            snake.grow()
+            growing = True
+
         g.display.update()
 
     time.sleep(2)
