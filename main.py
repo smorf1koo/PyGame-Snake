@@ -5,8 +5,8 @@ import random
 
 class Food:
     def __init__(self):
-        self.x = random.randint(0, 790)
-        self.y = random.randint(0, 590)
+        self.x = random.randint(10, 790)
+        self.y = random.randint(10, 590)
         self.color = (255, 222, 0)
 
     def show(self, screen):
@@ -106,10 +106,11 @@ def draw_text(screen, message, color, x, y, text_size):
 def main():
     size = (800, 600)
     g.init()
-    screen = g.display.set_mode(size, g.RESIZABLE)
+    screen = g.display.set_mode(size)
     g.display.set_caption("Snake")
 
     fps = 30
+    paused = False
 
     game_over = False
     clock = g.time.Clock()
@@ -123,6 +124,7 @@ def main():
         clock.tick(fps)
 
         growing = False
+
         for event in g.event.get():
             if event.type == g.QUIT:
                 game_over = True
@@ -140,11 +142,24 @@ def main():
                 elif event.key == g.K_RIGHT:
                     direction_x = 5
                     direction_y = 0
+                elif event.key == g.K_c:
+                    paused = not paused
 
         screen.fill((88, 2, 109))  # purple
+        draw_text(screen, f'Ваш счет: {score}', (255, 144, 0),
+                  90, 20, 40)
+
         show_food(screen, food)
         show_snake(screen, snake)
         move_snake(snake, direction_x, direction_y, growing)
+        
+        # if not paused:
+        while paused:
+            for event in g.event.get():
+                if event.type == g.KEYDOWN:
+                    if event.key == g.K_c:
+                        paused = not paused
+                        break
 
         if check_game_over(screen, snake):
             game_over = True
@@ -154,11 +169,8 @@ def main():
         if check_collision(snake, food):
             food = init_food()
             snake.grow()
-            # growing = True
             score += 1
 
-        draw_text(screen, f'Ваш счет: {score}', (255, 144, 0),
-                  90, 20, 40)
         g.display.update()
 
     time.sleep(4)
