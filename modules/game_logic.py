@@ -40,7 +40,8 @@ def check_game_over(screen, snake):
     head = snake.get_head()
     x = head['x']
     y = head['y']
-    if x <= 0 or y <= 0 or x >= screen.get_width() or y >= screen.get_height() or snake.check_collision_with_body():
+    if (x <= 0 or y <= 0 or x >= screen.get_width() or
+            y >= screen.get_height() or snake.check_collision_with_body()):
         return True
     return False
 

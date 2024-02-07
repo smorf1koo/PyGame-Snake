@@ -5,7 +5,7 @@ SNAKE_COLOR = (132, 233, 0)
 
 class Snake:
     def __init__(self, x, y):
-        # Initialize the snake with a single body segment at the specified position
+        # Init the snake with a single body segment at the target position
         self.body = [{'x': x, 'y': y}]
         self.width = 15
         self.height = 15
@@ -16,13 +16,17 @@ class Snake:
     def show(self, screen):
         # Display the snake on the screen
         for section in self.body:
-            g.draw.rect(screen, self.color, (section['x'], section['y'], self.width, self.height), border_radius=1)
+            g.draw.rect(screen, self.color,
+                        (section['x'], section['y'], self.width, self.height),
+                        border_radius=1)
 
     def move(self, direction_x, direction_y, growing=False):
         # Move the snake in the specified direction, and handle growth
         # Check if the new direction is opposite to the current direction
-        if (direction_x, direction_y) != (-self.current_direction[0], -self.current_direction[1]):
-            head = {'x': self.body[0]['x'] + direction_x, 'y': self.body[0]['y'] + direction_y}
+        if ((direction_x, direction_y) !=
+                (-self.current_direction[0], -self.current_direction[1])):
+            head = {'x': self.body[0]['x'] + direction_x,
+                    'y': self.body[0]['y'] + direction_y}
             self.body.insert(0, head)
             self.current_direction = (direction_x, direction_y)
 
