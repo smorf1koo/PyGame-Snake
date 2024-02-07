@@ -1,127 +1,31 @@
-import time
-import pygame as g
-import random
+from modules.game_logic import *
+from modules.berry import *
 
-
-class Food:
-    def __init__(self):
-        self.x = random.randint(10, 790)
-        self.y = random.randint(10, 590)
-        self.color = (255, 222, 0)
-
-    def show(self, screen):
-        g.draw.rect(screen, self.color, (self.x, self.y, 10, 10))
-
-    def get_x(self):
-        return self.x
-
-    def get_y(self):
-        return self.y
-
-
-class Snake:
-    def __init__(self, x, y):
-        self.body = [{'x': x, 'y': y}]
-        self.width = 10
-        self.height = 10
-        self.color = (132, 233, 0)
-        self.length = 0
-
-    def show(self, screen):
-        for section in self.body:
-            g.draw.rect(screen, self.color, (section['x'], section['y'], self.width, self.height), border_radius=1)
-
-    def move(self, direction_x, direction_y, growing=False):
-        head = {'x': self.body[0]['x'] + direction_x, 'y': self.body[0]['y'] + direction_y}
-        self.body.insert(0, head)
-
-        if not growing:
-            self.body.pop()
-
-    def check_collision_with_body(self):
-        head = self.body[0]
-        for section in self.body[1:]:
-            if head == section:
-                return True
-        return False
-
-    def grow(self):
-        tail = self.body[-1]
-        self.body.append({'x': tail['x'], 'y': tail['y']})
-
-    def get_head(self):
-        return self.body[0]
-
-
-def init_snake(screen):
-    x = screen.get_width()/2
-    y = screen.get_height()/2
-    return Snake(x, y)
-
-
-def move_snake(snake, x, y, growing):
-    snake.move(x, y, growing)
-
-
-def show_snake(screen, snake):
-    snake.show(screen)
-
-
-def init_food():
-    return Food()
-
-
-def show_food(screen, food):
-    food.show(screen)
-
-
-def check_game_over(screen, snake):
-    head = snake.get_head()
-    x = head['x']
-    y = head['y']
-    if x <= 0 or y <= 0 or x >= screen.get_width() or y >= screen.get_height() or snake.check_collision_with_body():
-        return True
-    return False
-
-
-def check_collision(snake, food):
-    head = snake.get_head()
-    snake_x = head['x']
-    snake_y = head['y']
-    food_x = food.get_x()
-    food_y = food.get_y()
-    if snake_x < food_x + 10 and snake_x + 10 > food_x \
-            and snake_y < food_y + 10 and snake_y + 10 > food_y:
-        return True
-    return False
-
-
-def draw_text(screen, message, color, x, y, text_size):
-    font = g.font.Font(None, text_size)
-    text = font.render(message, True, color)
-    text_rect = text.get_rect(center=(x, y))
-    screen.blit(text, text_rect)
+PURPLE = (88, 2, 109)
+ORANGE = (255, 144, 0)
+FPS = 30
+SIZE = (800, 600)
+GROW_BIG_BERRY, GROW_SMALL_BERRY = 5, 1
 
 
 def main():
-    size = (800, 600)
     g.init()
-    screen = g.display.set_mode(size)
+    screen = g.display.set_mode(SIZE)
     g.display.set_caption("Snake")
 
-    fps = 30
     paused = False
-
     game_over = False
+    last_key = None
+
     clock = g.time.Clock()
     snake = init_snake(screen)
-    food = init_food()
+    berry = spawn_berry()
     direction_x = direction_y = 0
     g.time.delay(1000)
     score = 1
 
     while not game_over:
-        clock.tick(fps)
+        clock.tick(FPS)
 
         growing = False
 
@@ -129,51 +33,60 @@ def main():
             if event.type == g.QUIT:
                 game_over = True
             if event.type == g.KEYDOWN:
-
-                if event.key == g.K_UP:
+                # Handle key presses to change snake direction
+                if event.key == g.K_UP and last_key != g.K_DOWN:
                     direction_x = 0
                     direction_y = -5
-                elif event.key == g.K_LEFT:
+                    last_key = g.K_UP
+                elif event.key == g.K_LEFT and last_key != g.K_RIGHT:
                     direction_x = -5
                     direction_y = 0
-                elif event.key == g.K_DOWN:
+                    last_key = g.K_LEFT
+                elif event.key == g.K_DOWN and last_key != g.K_UP:
                     direction_x = 0
                     direction_y = 5
-                elif event.key == g.K_RIGHT:
+                    last_key = g.K_DOWN
+                elif event.key == g.K_RIGHT and last_key != g.K_LEFT:
                     direction_x = 5
                     direction_y = 0
+                    last_key = g.K_RIGHT
                 elif event.key == g.K_c:
                     paused = not paused
 
-        screen.fill((88, 2, 109))  # purple
-        draw_text(screen, f'Ваш счет: {score}', (255, 144, 0),
+        screen.fill(PURPLE)
+        draw_text(screen, f'Your score: {score}', ORANGE,
                   90, 20, 40)
 
-        show_food(screen, food)
+        show_berry(screen, berry)
         show_snake(screen, snake)
         move_snake(snake, direction_x, direction_y, growing)
-        
-        # if not paused:
+
         while paused:
             for event in g.event.get():
                 if event.type == g.KEYDOWN:
+                    # Resume the game if 'c' key is pressed
                     if event.key == g.K_c:
                         paused = not paused
                         break
 
         if check_game_over(screen, snake):
             game_over = True
-            draw_text(screen, f'Игра окончена, ваш счет: {score}', (255, 144, 0),
+            draw_text(screen, f'Game over, your score: {score}', ORANGE,
                       screen.get_width()/2, screen.get_height()/2, 50)
 
-        if check_collision(snake, food):
-            food = init_food()
-            snake.grow()
-            score += 1
+        if check_collision(snake, berry):
+            berry = spawn_berry()
+
+            if isinstance(berry, BigBerry):
+                snake.grow(GROW_BIG_BERRY)
+                score += GROW_BIG_BERRY
+            elif isinstance(berry, SmallBerry):
+                snake.grow(GROW_SMALL_BERRY)
+                score += GROW_SMALL_BERRY
 
         g.display.update()
 
-    time.sleep(4)
+    g.time.delay(1200)
     g.quit()
     quit()
 
