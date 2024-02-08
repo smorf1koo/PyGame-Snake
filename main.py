@@ -75,14 +75,13 @@ def main():
                       screen.get_width()/2, screen.get_height()/2, 50)
 
         if check_collision(snake, berry):
-            berry = spawn_berry()
-
             if isinstance(berry, BigBerry):
                 snake.grow(GROW_BIG_BERRY)
                 score += GROW_BIG_BERRY
             elif isinstance(berry, SmallBerry):
                 snake.grow(GROW_SMALL_BERRY)
                 score += GROW_SMALL_BERRY
+            berry = spawn_berry()
 
         g.display.update()
 
