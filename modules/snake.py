@@ -1,5 +1,5 @@
 import pygame as g
-from values import SNAKE_COLOR
+from .values import SNAKE_COLOR
 
 
 class Snake:
