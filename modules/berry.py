@@ -7,10 +7,10 @@ class Berry:
         # Initialize the berry with a random position and choose a random icon
         self.x = random.randint(30, 770)
         self.y = random.randint(30, 570)
-        self.icons = ['images/berry_icons/berry_icon_1.png',
-                      'images/berry_icons/berry_icon_2.png',
-                      'images/berry_icons/berry_icon_3.png',
-                      'images/berry_icons/berry_icon_4.png']
+        self.icons = ['./images/berry_icons/berry_icon_1.png',
+                      './images/berry_icons/berry_icon_2.png',
+                      './images/berry_icons/berry_icon_3.png',
+                      './images/berry_icons/berry_icon_4.png']
         self.icon_path = self.icons[random.randint(0, 3)]
 
     def get_x(self):
