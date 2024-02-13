@@ -106,7 +106,13 @@ class SnakeGame:
             self.move_snake(self.direction_x, self.direction_y, growing)
 
             while self.paused:
+                pause_icon = g.image.load(PAUSE_ICON_PATH)
+                pause_icon = g.transform.scale(pause_icon, (70, 70))
+                self.screen.blit(pause_icon, (self.screen.get_width()/2-35, self.screen.get_height()/2-35))
+                g.display.update()
                 for event in g.event.get():
+                    if event.type == g.QUIT:
+                        g.quit()
                     if event.type == g.KEYDOWN:
                         if event.key == g.K_c:
                             self.paused = not self.paused
