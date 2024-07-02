@@ -99,7 +99,7 @@ class SnakeGame:
             self.handle_events()
 
             self.screen.fill(PURPLE)
-            self.draw_text(f'Your score: {self.score}', ORANGE, 90, 20, 40)
+            self.draw_text(f'Your score: {self.score}', ORANGE, 685, 20, 40)
 
             self.show_berry()
             self.show_snake()
@@ -140,8 +140,3 @@ class SnakeGame:
         g.time.delay(2200)
         g.quit()
         quit()
-
-
-# if __name__ == '__main__':
-#     # game = SnakeGame()
-#     # game.run()
