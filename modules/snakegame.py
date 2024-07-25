@@ -84,7 +84,7 @@ class SnakeGame:
         elif event.key == g.K_RIGHT and self.last_key != g.K_LEFT:
             self.direction_x, self.direction_y = 5, 0
             self.last_key = g.K_RIGHT
-        elif event.key == g.K_c:
+        elif event.unicode in ('c', 'C', 'с', 'С'):
             self.paused = not self.paused
 
     def handle_pause(self):
@@ -98,7 +98,8 @@ class SnakeGame:
                     self.running = False
                     self.game_over = True
                     self.restart_to_menu()
-                if event.type == g.KEYDOWN and event.key == g.K_c:
+                elif event.type == g.KEYDOWN and event.unicode in ('c', 'C', 'с', 'С'):
+                    # event.type == g.KEYDOWN and event.key in [g.K_c, g.K_s]:
                     self.paused = not self.paused
                     break
 
