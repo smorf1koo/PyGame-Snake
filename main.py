@@ -1,9 +1,9 @@
-from modules.snakegame import SnakeGame
+from modules.menu import Menu
 
 
 def main():
-    game = SnakeGame()
-    game.run()
+    menu = Menu()
+    menu.draw_menu()
 
 
 if __name__ == "__main__":

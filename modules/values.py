@@ -1,7 +1,9 @@
 PURPLE = (88, 2, 109)
 ORANGE = (255, 144, 0)
+YELLOW = (255, 255, 0)
 FPS = 30
-SIZE = (800, 600)
+GAME_SIZE = (800, 600)
+MENU_SIZE = (300, 300)
 GROW_BIG_BERRY, GROW_SMALL_BERRY = 5, 1
 EATING_SOUND_PATH = './sounds/nyam.wav'
 END_GAME_SOUND_PATH = './sounds/end_game_sound.wav'

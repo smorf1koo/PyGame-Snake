@@ -8,15 +8,16 @@ from .values import *
 
 class SnakeGame:
     def __init__(self):
+        self.running = True
+        self.paused = False
         g.init()
-        self.screen = g.display.set_mode(SIZE)
+        self.screen = g.display.set_mode(GAME_SIZE)
         g.display.set_caption("Snake")
         self.clock = g.time.Clock()
         self.snake = self.init_snake()
         self.berry = self.spawn_berry()
         self.direction_x = self.direction_y = 0
         self.last_key = None
-        self.paused = False
         self.game_over = False
         self.score = 1
         self.eating_sound = AudioPlayer(EATING_SOUND_PATH)
@@ -36,7 +37,8 @@ class SnakeGame:
     def show_berry(self):
         self.berry.show(self.screen)
 
-    def spawn_berry(self):
+    @staticmethod
+    def spawn_berry():
         random_value = random.randint(1, 100)
         if random_value % 20 == 0:
             return BigBerry()
@@ -69,30 +71,50 @@ class SnakeGame:
         text_rect = text.get_rect(center=(x, y))
         self.screen.blit(text, text_rect)
 
+    def handle_keydown(self, event):
+        if event.key == g.K_UP and self.last_key != g.K_DOWN:
+            self.direction_x, self.direction_y = 0, -5
+            self.last_key = g.K_UP
+        elif event.key == g.K_LEFT and self.last_key != g.K_RIGHT:
+            self.direction_x, self.direction_y = -5, 0
+            self.last_key = g.K_LEFT
+        elif event.key == g.K_DOWN and self.last_key != g.K_UP:
+            self.direction_x, self.direction_y = 0, 5
+            self.last_key = g.K_DOWN
+        elif event.key == g.K_RIGHT and self.last_key != g.K_LEFT:
+            self.direction_x, self.direction_y = 5, 0
+            self.last_key = g.K_RIGHT
+        elif event.key == g.K_c:
+            self.paused = not self.paused
+
+    def handle_pause(self):
+        pause_icon = g.image.load(PAUSE_ICON_PATH)
+        pause_icon = g.transform.scale(pause_icon, (70, 70))
+        self.screen.blit(pause_icon, (self.screen.get_width()/2-35, self.screen.get_height()/2-35))
+        g.display.update()
+        while self.paused:
+            for event in g.event.get():
+                if event.type == g.QUIT:
+                    self.running = False
+                    self.game_over = True
+                    self.restart_to_menu()
+                if event.type == g.KEYDOWN and event.key == g.K_c:
+                    self.paused = not self.paused
+                    break
+
     def handle_events(self):
         for event in g.event.get():
             if event.type == g.QUIT:
+                self.running = False
                 self.game_over = True
-            if event.type == g.KEYDOWN:
-                if event.key == g.K_UP and self.last_key != g.K_DOWN:
-                    self.direction_x, self.direction_y = 0, -5
-                    self.last_key = g.K_UP
-                elif event.key == g.K_LEFT and self.last_key != g.K_RIGHT:
-                    self.direction_x, self.direction_y = -5, 0
-                    self.last_key = g.K_LEFT
-                elif event.key == g.K_DOWN and self.last_key != g.K_UP:
-                    self.direction_x, self.direction_y = 0, 5
-                    self.last_key = g.K_DOWN
-                elif event.key == g.K_RIGHT and self.last_key != g.K_LEFT:
-                    self.direction_x, self.direction_y = 5, 0
-                    self.last_key = g.K_RIGHT
-                elif event.key == g.K_c:
-                    self.paused = not self.paused
+                self.restart_to_menu()
+            elif event.type == g.KEYDOWN:
+                self.handle_keydown(event)
 
     def run(self):
         g.time.delay(1000)
 
-        while not self.game_over:
+        while self.running:
             self.clock.tick(FPS)
             growing = False
 
@@ -105,28 +127,20 @@ class SnakeGame:
             self.show_snake()
             self.move_snake(self.direction_x, self.direction_y, growing)
 
-            while self.paused:
-                pause_icon = g.image.load(PAUSE_ICON_PATH)
-                pause_icon = g.transform.scale(pause_icon, (70, 70))
-                self.screen.blit(pause_icon, (self.screen.get_width()/2-35, self.screen.get_height()/2-35))
-                g.display.update()
-                for event in g.event.get():
-                    if event.type == g.QUIT:
-                        g.quit()
-                    if event.type == g.KEYDOWN:
-                        if event.key == g.K_c:
-                            self.paused = not self.paused
-                            break
+            if self.paused:
+                self.handle_pause()
 
             if self.check_game_over():
-                self.game_over = True
+                self.running = False
                 self.end_game_sound.replay()
                 self.draw_text(f'Game over, your score: {self.score}', ORANGE,
                                self.screen.get_width() / 2, self.screen.get_height() / 2, 50)
+                g.display.update()
+                g.time.delay(2200)
+                self.restart_to_menu()
 
             if self.check_collision():
                 self.eating_sound.replay()
-
                 if isinstance(self.berry, BigBerry):
                     self.snake.grow(GROW_BIG_BERRY)
                     self.score += GROW_BIG_BERRY
@@ -137,6 +151,9 @@ class SnakeGame:
 
             g.display.update()
 
-        g.time.delay(2200)
+    @staticmethod
+    def restart_to_menu():
+        from .menu import Menu
         g.quit()
-        quit()
+        menu = Menu()
+        menu.draw_menu()
