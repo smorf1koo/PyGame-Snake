@@ -12,15 +12,18 @@ class Menu:
         self.clock = g.time.Clock()
         self.running = True
         self.buttons = [
-            Button("Start Game", (self.screen.get_width() / 2, self.screen.get_height() / 6 - 10),
-                   40, ORANGE, YELLOW),
-            Button("LeaderBoard", (self.screen.get_width() / 2, (self.screen.get_height() / 6) + 50),
-                   40, ORANGE, YELLOW),
-            Button("Exit", (self.screen.get_width() / 2, (self.screen.get_height() / 6) + 220), 40,
-                   ORANGE, YELLOW)
+            Button("Start Game", ((self.screen.get_width() / 2), (self.screen.get_height() / 6 - 10)),
+                   40, WHITE, TEXT_BUTTON_COLOR, BLACK, 1),
+            Button("LeaderBoard", ((self.screen.get_width() / 2), (self.screen.get_height() / 6 + 50)),
+                   40, WHITE, TEXT_BUTTON_COLOR, BLACK, 1),
+            Button("Sounds", ((self.screen.get_width() / 2), (self.screen.get_height() / 6 + 110)),
+                   40, WHITE, TEXT_BUTTON_COLOR, BLACK, 1),
+            Button("Exit", ((self.screen.get_width() / 2), (self.screen.get_height() / 6 + 220)),
+                   40, WHITE, TEXT_BUTTON_COLOR, BLACK, 1)
         ]
 
-    def start_game(self):
+    @staticmethod
+    def start_game():
         game = SnakeGame()
         game.run()
 
